@@ -80,3 +80,19 @@ def delete_post(id: int):
     else:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Post with id {id} not found")
+
+
+@app.put("/posts/{id}")
+def update_post(id: int, post: Post):
+    post_index = find_post_index(id)
+
+    if post_index == None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                            detail=f"Post with id {id} not found")
+    else:
+        updated_post = post.dict()
+        updated_post['id'] = id
+        posts[post_index] = updated_post
+        return {
+            "data": posts[post_index]
+        }
