@@ -1,7 +1,8 @@
-from fastapi import FastAPI, status
+from fastapi import FastAPI, status, HTTPException
 from pydantic import BaseModel
 from random import randint
 from typing import Optional
+
 
 app = FastAPI()
 
@@ -54,3 +55,12 @@ def create_post(post: Post):
     post.id = randint(3, 30000)
     posts.append(post.dict())
     return {"data": post}
+
+
+@app.get("/posts/{id}")
+def get_post(id: int):
+    for post in posts:
+        if post['id'] == id:
+            return post
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
+                        detail=f"Post with id {id} not found")
