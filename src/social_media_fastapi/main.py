@@ -25,20 +25,22 @@ while True:
             row_factory=dict_row,
             autocommit=True
         )
-        cursor = connection.cursor()
-        print("Connected to PostgreSQL")
-        break
 
     except KeyError as error:
-        print(
-            f"Configuration error: missing environment variable(s) {error.args}")
+        raise RuntimeError(
+            f"Configuration error: missing environment variable(s) {error.args}") from error
     except OperationalError as error:
         print(f"Connection or operational error: {error}")
         sleep(2)
     except PsycopgError as error:
-        print(f"Database error: {error}")
+        raise RuntimeError(f"Database error: {error}") from error
     except Exception as error:
-        print(f"Something went wrong: {error}")
+        raise RuntimeError(
+            f"Unexpected error during database startup: {error}") from error
+    else:
+        cursor = connection.cursor()
+        print("Connected to PostgreSQL")
+        break
 
 
 class Post(BaseModel):
