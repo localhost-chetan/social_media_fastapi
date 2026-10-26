@@ -1,12 +1,10 @@
 from fastapi import FastAPI, status, HTTPException
-from pydantic import BaseModel
-from random import randint
-from typing import Optional
 from psycopg import connect, OperationalError, Error as PsycopgError
 from psycopg.rows import dict_row
 from os import environ
 from dotenv import load_dotenv
 from time import sleep
+from .schemas import PostBase
 
 load_dotenv()
 
@@ -39,14 +37,19 @@ while True:
             f"Unexpected error during database startup: {error}") from error
     else:
         cursor = connection.cursor()
+
+        cursor.execute("""
+            CREATE TABLE IF NOT EXISTS public.posts (
+            id SERIAL,
+            title TEXT NOT NULL,
+            content TEXT NOT NULL,
+            is_published BOOLEAN NOT NULL DEFAULT TRUE,
+            PRIMARY KEY(id)
+        );
+        """)
+
         print("Connected to PostgreSQL")
         break
-
-
-class Post(BaseModel):
-    title: str
-    content: str
-    is_published: bool = True
 
 
 @app.get('/')
@@ -64,12 +67,12 @@ def get_posts():
 
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
-def create_post(post: Post):
+def create_post(post: PostBase):
     cursor.execute("""
         INSERT INTO public.posts (title, content, is_published)
         VALUES
             (%s, %s, %s)
-        RETURNING *;
+        RETURNING title, content, is_published;
     """, (post.title, post.content, post.is_published))
     post = cursor.fetchone()
     return post
@@ -103,7 +106,7 @@ def delete_post(id: int):
 
 
 @app.put("/posts/{id}")
-def update_post(id: int, post: Post):
+def update_post(id: int, post: PostBase):
     cursor.execute("""
         SELECT id FROM public.posts
         WHERE id = %s
