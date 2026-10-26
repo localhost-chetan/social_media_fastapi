@@ -5,6 +5,7 @@ from os import environ
 from dotenv import load_dotenv
 from time import sleep
 from .schemas import PostBase
+from .repositories import posts as posts_repository
 
 load_dotenv()
 
@@ -38,16 +39,6 @@ while True:
     else:
         cursor = connection.cursor()
 
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS public.posts (
-            id SERIAL,
-            title TEXT NOT NULL,
-            content TEXT NOT NULL,
-            is_published BOOLEAN NOT NULL DEFAULT TRUE,
-            PRIMARY KEY(id)
-        );
-        """)
-
         print("Connected to PostgreSQL")
         break
 
@@ -59,32 +50,20 @@ def root():
 
 @app.get("/posts")
 def get_posts():
-    cursor.execute("""
-        SELECT * FROM public.posts;
-    """)
-    all_posts = cursor.fetchall()
+    all_posts = posts_repository.get_all_posts(cursor=cursor)
     return all_posts
 
 
 @app.post("/posts", status_code=status.HTTP_201_CREATED)
 def create_post(post: PostBase):
-    cursor.execute("""
-        INSERT INTO public.posts (title, content, is_published)
-        VALUES
-            (%s, %s, %s)
-        RETURNING title, content, is_published;
-    """, (post.title, post.content, post.is_published))
-    post = cursor.fetchone()
+    post = posts_repository.create_post(cursor=cursor, post=post)
     return post
 
 
 @app.get("/posts/{id}")
 def get_post(id: int):
-    cursor.execute("""
-        SELECT * FROM public.posts
-        WHERE id = %s;
-    """, (str(id),))
-    post = cursor.fetchone()
+    post = posts_repository.get_post_by_id(cursor=cursor, id=id)
+
     if not (post == None):
         return post
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -93,12 +72,7 @@ def get_post(id: int):
 
 @app.delete("/posts/{id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_post(id: int):
-    cursor.execute("""
-        DELETE FROM public.posts
-        WHERE id = %s
-        RETURNING *;
-    """, (str(id),))
-    deleted_post = cursor.fetchone()
+    deleted_post = posts_repository.delete_post_by_id(cursor=cursor, id=id)
 
     if deleted_post == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
@@ -107,24 +81,13 @@ def delete_post(id: int):
 
 @app.put("/posts/{id}")
 def update_post(id: int, post: PostBase):
-    cursor.execute("""
-        SELECT id FROM public.posts
-        WHERE id = %s
-    """, (str(id),))
-    post_id = cursor.fetchone()
+    post_id = posts_repository.get_post_by_id(cursor=cursor, id=id)
+
     if post_id == None:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,
                             detail=f"Post with id {id} not found")
     else:
-        cursor.execute("""
-            UPDATE public.posts
-            SET
-                title = %s,
-                content = %s,
-                is_published = %s
-            WHERE id = %s
-            RETURNING *
-        """, (post.title, post.content, post.is_published, str(id)))
-        updated_post = cursor.fetchone()
+        updated_post = posts_repository.update_post_by_id(
+            cursor=cursor, id=id, post=post)
 
         return updated_post
