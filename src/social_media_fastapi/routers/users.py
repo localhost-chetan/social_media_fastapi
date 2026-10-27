@@ -2,6 +2,7 @@ from ..database import pool
 from social_media_fastapi.schemas import UserBase, UserOut
 from fastapi import APIRouter, status, HTTPException
 from social_media_fastapi.repositories import users as users_repository
+from social_media_fastapi.services.hashing import hash_password
 
 
 router = APIRouter(prefix="/users", tags=['users'])
@@ -23,6 +24,9 @@ def create_user(user: UserBase):
                 cursor=cursor, email=user.email)
 
             if existing_user is None:
+                hashed_password = hash_password(password=user.password)
+                user.__dict__['password'] = hashed_password
+
                 new_user = users_repository.create_new_user(
                     cursor=cursor, user=user)
                 return new_user
