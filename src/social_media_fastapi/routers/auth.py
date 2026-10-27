@@ -1,5 +1,5 @@
 from social_media_fastapi.services.jwt import JWTService
-from social_media_fastapi.services.hashing import verify_password, hash_password
+from social_media_fastapi.services.hashing import verify_password
 from fastapi import APIRouter, HTTPException, status
 from social_media_fastapi.database import pool
 from social_media_fastapi.schemas import UserBase, Login
@@ -28,7 +28,7 @@ def login(user_credentials: UserBase):
                     status_code=status.HTTP_401_UNAUTHORIZED, detail="Incorrect Password")
 
             # create access token (JWT)
-            jwt = JWTService().create_access_token(used_id=existing_user['id'])
+            jwt = JWTService().create_access_token(user_id=existing_user['id'])
 
             return {
                 "access_token": jwt,
