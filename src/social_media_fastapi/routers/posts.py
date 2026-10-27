@@ -1,4 +1,4 @@
-from ..database import pool
+from social_media_fastapi.database import pool
 from social_media_fastapi.schemas import PostBase
 from fastapi import APIRouter, HTTPException, status
 from social_media_fastapi.repositories import posts as posts_repository

@@ -1,4 +1,4 @@
-from ..database import pool
+from social_media_fastapi.database import pool
 from social_media_fastapi.schemas import UserBase, UserOut
 from fastapi import APIRouter, status, HTTPException
 from social_media_fastapi.repositories import users as users_repository
@@ -26,10 +26,22 @@ def create_user(user: UserBase):
             if existing_user is None:
                 hashed_password = hash_password(password=user.password)
                 user.__dict__['password'] = hashed_password
-
                 new_user = users_repository.create_new_user(
                     cursor=cursor, user=user)
                 return new_user
             else:
                 raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                                     detail=f"User with email {user.email} already exists")
+
+
+@router.get("/{id}", response_model=UserOut)
+def get_user(id: int):
+    with pool.connection() as connection:
+        with connection.cursor() as cursor:
+            user = users_repository.get_user_by_id(cursor=cursor, id=id)
+
+            if not user:
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail=f"User with id {id} not found")
+
+            return user

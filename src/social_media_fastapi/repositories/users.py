@@ -38,3 +38,16 @@ def find_user_by_email(*, cursor: Cursor, email: str):
     """, (email, ))
 
     return cursor.fetchone()
+
+
+def get_user_by_id(*, cursor: Cursor, id: int):
+    cursor.execute("""
+        SELECT
+            id, email, created_at
+        FROM
+            public.users
+        WHERE
+            id = %s
+    """, (str(id), ))
+
+    return cursor.fetchone()
