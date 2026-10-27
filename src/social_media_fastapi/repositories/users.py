@@ -1,5 +1,5 @@
 from psycopg import Cursor
-from social_media_fastapi.schemas import UserBase
+from social_media_fastapi.schemas import UserBase, UserOut
 
 
 def get_all_useers(*, cursor: Cursor):
@@ -27,10 +27,10 @@ def create_new_user(*, cursor: Cursor, user: UserBase):
     return cursor.fetchone()
 
 
-def find_user_by_email(*, cursor: Cursor, email: str):
+def find_user_by_email(*, cursor: Cursor, email: str) -> UserOut.WithPassword:
     cursor.execute("""
         SELECT
-            (email)
+            id, email, password
         FROM
             public.users
         WHERE
@@ -49,5 +49,18 @@ def get_user_by_id(*, cursor: Cursor, id: int):
         WHERE
             id = %s
     """, (str(id), ))
+
+    return cursor.fetchone()
+
+
+def get_user_password(*, cursor: Cursor, password: str):
+    cursor.execute("""
+        SELECT
+            password
+        FROM
+            public.users
+        WHERE
+            password = %s
+    """, (password, ))
 
     return cursor.fetchone()

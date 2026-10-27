@@ -1,7 +1,8 @@
 from fastapi import FastAPI
 from social_media_fastapi.database import pool
-from social_media_fastapi.routers.posts import router as posts_router
-from social_media_fastapi.routers.users import router as users_router
+from social_media_fastapi.routers.posts import router as post_router
+from social_media_fastapi.routers.users import router as user_router
+from social_media_fastapi.routers.auth import router as auth_router
 
 
 app = FastAPI()
@@ -24,5 +25,6 @@ def root():
     return {"message": "Hello World"}
 
 
-app.include_router(router=posts_router)
-app.include_router(router=users_router)
+app.include_router(router=post_router)
+app.include_router(router=user_router)
+app.include_router(router=auth_router)

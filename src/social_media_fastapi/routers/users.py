@@ -1,7 +1,7 @@
 from social_media_fastapi.database import pool
 from social_media_fastapi.schemas import UserBase, UserOut
 from fastapi import APIRouter, status, HTTPException
-from social_media_fastapi.repositories import users as users_repository
+from social_media_fastapi.repositories import users as user_repository
 from social_media_fastapi.services.hashing import hash_password
 
 
@@ -12,7 +12,7 @@ router = APIRouter(prefix="/users", tags=['users'])
 def get_users():
     with pool.connection() as connection:
         with connection.cursor() as cursor:
-            all_users = users_repository.get_all_useers(cursor=cursor)
+            all_users = user_repository.get_all_useers(cursor=cursor)
             return all_users
 
 
@@ -20,13 +20,13 @@ def get_users():
 def create_user(user: UserBase):
     with pool.connection() as connection:
         with connection.cursor() as cursor:
-            existing_user = users_repository.find_user_by_email(
+            existing_user = user_repository.find_user_by_email(
                 cursor=cursor, email=user.email)
 
             if existing_user is None:
                 hashed_password = hash_password(password=user.password)
                 user.__dict__['password'] = hashed_password
-                new_user = users_repository.create_new_user(
+                new_user = user_repository.create_new_user(
                     cursor=cursor, user=user)
                 return new_user
             else:
@@ -38,7 +38,7 @@ def create_user(user: UserBase):
 def get_user(id: int):
     with pool.connection() as connection:
         with connection.cursor() as cursor:
-            user = users_repository.get_user_by_id(cursor=cursor, id=id)
+            user = user_repository.get_user_by_id(cursor=cursor, id=id)
 
             if not user:
                 raise HTTPException(
