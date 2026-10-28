@@ -1,12 +1,13 @@
 from pwdlib import PasswordHash
 
 
-_hasher = PasswordHash.recommended()
+class PasswordHashingService:
+    __hasher = PasswordHash.recommended()
 
+    @classmethod
+    def hash_password(cls, *, password: str) -> str:
+        return cls.__hasher.hash(password)
 
-def hash_password(*, password: str) -> str:
-    return _hasher.hash(password)
-
-
-def verify_password(*, password: str, hashed_password: str) -> bool:
-    return _hasher.verify(password=password, hash=hashed_password)
+    @classmethod
+    def verify_password(cls, *, password: str, hashed_password: str) -> bool:
+        return cls.__hasher.verify(password=password, hash=hashed_password)

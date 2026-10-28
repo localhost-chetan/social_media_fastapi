@@ -2,20 +2,20 @@ from datetime import datetime
 from pydantic import BaseModel, EmailStr
 
 
-class PostBase(BaseModel):
+class PostSchema(BaseModel):
     """ This model describes the data you API accepts from client. """
     title: str
     content: str
     is_published: bool = True
 
 
-class UserBase(BaseModel):
+class UserSchema(BaseModel):
     """ Validate user registration input, including email and password. """
     email: EmailStr
     password: str
 
 
-class UserOut(BaseModel):
+class UserResponseSchema(BaseModel):
     """ Represent public user data returned by the API, excluding the password. """
     id: int
     email: EmailStr
@@ -25,6 +25,6 @@ class UserOut(BaseModel):
         password: str
 
 
-class Login(BaseModel):
+class LoginResponseSchema(BaseModel):
     access_token: str
     type: str

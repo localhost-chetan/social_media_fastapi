@@ -1,5 +1,5 @@
 from social_media_fastapi.database import pool
-from social_media_fastapi.schemas import PostBase
+from social_media_fastapi.schemas import PostSchema
 from fastapi import APIRouter, HTTPException, status
 from social_media_fastapi.repositories import posts as post_repository
 
@@ -16,7 +16,7 @@ def get_posts():
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED)
-def create_posts(post: PostBase):
+def create_posts(post: PostSchema):
     with pool.connection() as connection:
         with connection.cursor() as cursor:
             created_post = post_repository.create_post(
@@ -49,7 +49,7 @@ def delete_post(id: int):
 
 
 @router.put("/{id}")
-def update_post(id: int, post: PostBase):
+def update_post(id: int, post: PostSchema):
     with pool.connection() as connection:
         with connection.cursor() as cursor:
             post_id = post_repository.get_post_by_id(cursor=cursor, id=id)

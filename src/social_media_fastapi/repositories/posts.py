@@ -1,5 +1,5 @@
 from psycopg import Cursor
-from social_media_fastapi.schemas import PostBase
+from social_media_fastapi.schemas import PostSchema
 
 
 def get_all_posts(*, cursor: Cursor):
@@ -26,7 +26,7 @@ def get_post_by_id(*, cursor: Cursor, id: int):
     return cursor.fetchone()
 
 
-def create_post(*, cursor: Cursor, post: PostBase):
+def create_post(*, cursor: Cursor, post: PostSchema):
     cursor.execute("""
         INSERT INTO
             public.posts
@@ -53,7 +53,7 @@ def delete_post_by_id(*, cursor: Cursor, id: int):
     return cursor.fetchone()
 
 
-def update_post_by_id(*, cursor: Cursor, id: int, post: PostBase):
+def update_post_by_id(*, cursor: Cursor, id: int, post: PostSchema):
     cursor.execute("""
         UPDATE
             public.posts

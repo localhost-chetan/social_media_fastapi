@@ -1,5 +1,6 @@
+from typing import Any
 from psycopg import Cursor
-from social_media_fastapi.schemas import UserBase, UserOut
+from social_media_fastapi.schemas import UserSchema, UserResponseSchema
 
 
 def get_all_useers(*, cursor: Cursor):
@@ -13,7 +14,7 @@ def get_all_useers(*, cursor: Cursor):
     return cursor.fetchall()
 
 
-def create_new_user(*, cursor: Cursor, user: UserBase):
+def create_new_user(*, cursor: Cursor, user: UserSchema):
     cursor.execute("""
         INSERT INTO
             public.users
@@ -27,7 +28,7 @@ def create_new_user(*, cursor: Cursor, user: UserBase):
     return cursor.fetchone()
 
 
-def find_user_by_email(*, cursor: Cursor, email: str) -> UserOut.WithPassword:
+def find_user_by_email(*, cursor: Cursor, email: str) -> UserResponseSchema.WithPassword:
     cursor.execute("""
         SELECT
             id, email, password
