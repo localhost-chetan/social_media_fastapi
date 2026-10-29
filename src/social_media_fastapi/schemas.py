@@ -21,6 +21,7 @@ class PostSchema(BaseModel):
     title: str
     content: str
     is_published: bool = True
+    user_id: int
 
 
 class PostResponseSchema(BaseModel):
@@ -34,6 +35,7 @@ class PostResponseSchema(BaseModel):
     content: str
     is_published: bool
     created_at: datetime
+    user_id: int
 
 
 # User Schema

@@ -2,7 +2,7 @@ from typing import List
 from fastapi import Depends
 from social_media_fastapi.schemas import PostSchema, PostResponseSchema
 from fastapi import APIRouter, HTTPException, status
-from social_media_fastapi.dependencies import DbPool, get_current_user
+from social_media_fastapi.dependencies import DbPool, get_current_user, CurrentUser
 from social_media_fastapi.repositories import posts as post_repository
 
 
@@ -23,11 +23,11 @@ def get_posts(db_pool: DbPool):
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=PostResponseSchema)
-def create_posts(post: PostSchema, db_pool: DbPool):
+def create_posts(post: PostSchema, db_pool: DbPool, current_user: CurrentUser):
     with db_pool.connection() as connection:
         with connection.cursor() as cursor:
             created_post = post_repository.create_post(
-                cursor=cursor, post=post)
+                cursor=cursor, post=post, current_user_id=current_user.id)
             return created_post
 
 
