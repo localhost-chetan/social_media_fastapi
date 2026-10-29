@@ -1,22 +1,16 @@
-from os import environ
+from typing import Literal
+from social_media_fastapi.utils import get_env_key
 
 import jwt
 from typing import Any
 from datetime import datetime, timezone, timedelta
 
 
+KeyType = Literal["JWT_SECRET_KEY", "JWT_EXPIRATION_TIME"]
+
+
 class JWTService:
     __ALGORITHM = "HS256"
-    __ACCESS_TOKEN_MINUTES = 20
-
-    @staticmethod
-    def __get_secret_key() -> str:
-        secret_key = environ.get('JWT_SECRET_KEY')
-
-        if secret_key is None:
-            raise KeyError(
-                'Missing required environment variable: "JWT_SECRET_KEY"')
-        return secret_key
 
     @classmethod
     def create_access_token(cls, *, user_id: int) -> str:
@@ -25,15 +19,15 @@ class JWTService:
         payload = {
             "sub": str(user_id),
             "iat": now,
-            "exp": now + timedelta(minutes=cls.__ACCESS_TOKEN_MINUTES)
+            "exp": now + timedelta(minutes=float(get_env_key(key_name="JWT_EXPIRATION_TIME")))
         }
 
-        return jwt.encode(payload=payload, key=cls.__get_secret_key(), algorithm=cls.__ALGORITHM)
+        return jwt.encode(payload=payload, key=get_env_key(key_name="JWT_SECRET_KEY"), algorithm=cls.__ALGORITHM)
 
     @classmethod
     def decode_access_token(cls, *, token: str) -> dict[str, Any]:
         return jwt.decode(
             jwt=token,
-            key=cls.__get_secret_key(),
+            key=get_env_key(key_name="JWT_SECRET_KEY"),
             algorithms=[cls.__ALGORITHM]
         )

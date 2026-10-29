@@ -1,3 +1,4 @@
+from os import environ
 from fastapi import FastAPI
 from social_media_fastapi.database import pool
 from social_media_fastapi.routers import users, posts, auth
