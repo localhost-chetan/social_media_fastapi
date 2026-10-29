@@ -12,7 +12,7 @@ router = APIRouter(prefix="/users", tags=['users'])
 def get_users():
     with pool.connection() as connection:
         with connection.cursor() as cursor:
-            all_users = user_repository.get_all_useers(cursor=cursor)
+            all_users = user_repository.get_all_users(cursor=cursor)
             return all_users
 
 
@@ -20,18 +20,15 @@ def get_users():
 def create_user(user: UserSchema):
     with pool.connection() as connection:
         with connection.cursor() as cursor:
-            existing_user = user_repository.find_user_by_email(
-                cursor=cursor, email=user.email)
+            hashed_password = PasswordHashingService().hash_password(password=user.password)
+            user.password = hashed_password
+            new_user = user_repository.create_user(
+                cursor=cursor, user=user)
 
-            if existing_user is None:
-                hashed_password = PasswordHashingService().hash_password(password=user.password)
-                user.__dict__['password'] = hashed_password
-                new_user = user_repository.create_new_user(
-                    cursor=cursor, user=user)
-                return new_user
-            else:
+            if new_user is None:
                 raise HTTPException(status_code=status.HTTP_409_CONFLICT,
                                     detail=f"User with email {user.email} already exists")
+            return new_user
 
 
 @router.get("/{id}", response_model=UserResponseSchema)

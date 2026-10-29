@@ -13,7 +13,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 def login(user_credentials: UserSchema):
     with pool.connection() as connection:
         with connection.cursor() as cursor:
-            existing_user = user_repository.find_user_by_email(
+            existing_user = user_repository.get_user_for_authentication(
                 cursor=cursor, email=user_credentials.email)
 
             if existing_user is None:
@@ -21,7 +21,7 @@ def login(user_credentials: UserSchema):
                                     detail=f"User with email {user_credentials.email} not found")
 
             is_password_valid = PasswordHashingService().verify_password(
-                password=user_credentials.password, hashed_password=existing_user['password'])
+                password=user_credentials.password, hashed_password=existing_user.password)
 
             if not is_password_valid:
                 raise HTTPException(
@@ -30,7 +30,7 @@ def login(user_credentials: UserSchema):
             # create access token (JWT)
             try:
                 jwt = JWTService().create_access_token(
-                    user_id=existing_user['id'])
+                    user_id=existing_user.id)
             except KeyError as error:
                 raise HTTPException(
                     status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"{error}")

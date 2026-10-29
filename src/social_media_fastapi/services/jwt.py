@@ -1,6 +1,7 @@
 from os import environ
 
 import jwt
+from typing import Any
 from datetime import datetime, timezone, timedelta
 
 
@@ -28,3 +29,11 @@ class JWTService:
         }
 
         return jwt.encode(payload=payload, key=cls.__get_secret_key(), algorithm=cls.__ALGORITHM)
+
+    @classmethod
+    def decode_access_token(cls, *, token: str) -> dict[str, Any]:
+        return jwt.decode(
+            jwt=token,
+            key=cls.__get_secret_key(),
+            algorithms=[cls.__ALGORITHM]
+        )

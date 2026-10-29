@@ -1,8 +1,10 @@
+from typing import Annotated
+from typing import List
 from psycopg import Cursor
-from social_media_fastapi.schemas import PostSchema
+from social_media_fastapi.schemas import PostSchema, PostResponseSchema
 
 
-def get_all_posts(*, cursor: Cursor):
+def get_all_posts(*, cursor: Cursor) -> List[PostResponseSchema]:
     cursor.execute("""
         SELECT
             *
@@ -10,10 +12,10 @@ def get_all_posts(*, cursor: Cursor):
             public.posts;
     """)
 
-    return cursor.fetchall()
+    return [PostResponseSchema.model_validate(row) for row in cursor.fetchall()]
 
 
-def get_post_by_id(*, cursor: Cursor, id: int):
+def get_post_by_id(*, cursor: Cursor, id: int) -> PostResponseSchema:
     cursor.execute("""
         SELECT
             *
@@ -21,12 +23,17 @@ def get_post_by_id(*, cursor: Cursor, id: int):
             public.posts
         WHERE
             id = %s;
-    """, (str(id),))
+    """, (id,))
 
-    return cursor.fetchone()
+    row = cursor.fetchone()
+
+    if row is None:
+        return None
+
+    return PostResponseSchema.model_validate(row)
 
 
-def create_post(*, cursor: Cursor, post: PostSchema):
+def create_post(*, cursor: Cursor, post: PostSchema) -> PostResponseSchema | None:
     cursor.execute("""
         INSERT INTO
             public.posts
@@ -34,13 +41,18 @@ def create_post(*, cursor: Cursor, post: PostSchema):
         VALUES
             (%s, %s, %s)
         RETURNING
-            title, content, is_published;
+            id, title, content, is_published, created_at;
     """, (post.title, post.content, post.is_published))
 
-    return cursor.fetchone()
+    row = cursor.fetchone()
+
+    if row is None:
+        return None
+
+    return PostResponseSchema.model_validate(row)
 
 
-def delete_post_by_id(*, cursor: Cursor, id: int):
+def delete_post_by_id(*, cursor: Cursor, id: int) -> Annotated[int, "Post id"]:
     cursor.execute("""
         DELETE FROM
             public.posts
@@ -48,12 +60,17 @@ def delete_post_by_id(*, cursor: Cursor, id: int):
             id = %s
         RETURNING
             id;
-    """, (str(id),))
+    """, (id,))
 
-    return cursor.fetchone()
+    row = cursor.fetchone()
+
+    if row is None:
+        return None
+
+    return row
 
 
-def update_post_by_id(*, cursor: Cursor, id: int, post: PostSchema):
+def update_post_by_id(*, cursor: Cursor, id: int, post: PostSchema) -> PostResponseSchema | None:
     cursor.execute("""
         UPDATE
             public.posts
@@ -65,6 +82,11 @@ def update_post_by_id(*, cursor: Cursor, id: int, post: PostSchema):
             id = %s
         RETURNING
             *;
-    """, (post.title, post.content, post.is_published, str(id)))
+    """, (post.title, post.content, post.is_published, id))
 
-    return cursor.fetchone()
+    row = cursor.fetchone()
+
+    if row is None:
+        return None
+
+    return PostResponseSchema.model_validate(row)
