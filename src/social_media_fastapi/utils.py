@@ -1,5 +1,8 @@
 from os import environ
 from typing import Literal
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 KeyType = Literal["JWT_SECRET_KEY",
