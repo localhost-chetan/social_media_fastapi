@@ -1,7 +1,8 @@
 from typing import List
 from fastapi import Depends
-from social_media_fastapi.schemas import PostSchema, PostResponseSchema
 from fastapi import APIRouter, HTTPException, status
+from social_media_fastapi.dependencies import ensure_post_owner
+from social_media_fastapi.schemas import PostSchema, PostResponseSchema
 from social_media_fastapi.dependencies import DbPool, get_current_user, CurrentUser
 from social_media_fastapi.repositories import posts as post_repository
 
@@ -31,7 +32,7 @@ def create_posts(post: PostSchema, db_pool: DbPool, current_user: CurrentUser):
             return created_post
 
 
-@router.get("/{id}", response_model=PostResponseSchema)
+@router.get("/{id}", response_model=PostResponseSchema, dependencies=[Depends(ensure_post_owner)])
 def get_post(id: int, db_pool: DbPool):
     with db_pool.connection() as connection:
         with connection.cursor() as cursor:
@@ -43,7 +44,11 @@ def get_post(id: int, db_pool: DbPool):
                 status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with id {id} not found")
 
 
-@router.delete("/{id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete(
+    "/{id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    dependencies=[Depends(ensure_post_owner)],
+)
 def delete_post(id: int, db_pool: DbPool):
     with db_pool.connection() as connection:
         with connection.cursor() as cursor:
@@ -55,18 +60,19 @@ def delete_post(id: int, db_pool: DbPool):
                     status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with id {id} not found")
 
 
-@router.put("/{id}", response_model=PostResponseSchema)
+@router.put(
+    "/{id}",
+    response_model=PostResponseSchema,
+    dependencies=[Depends(ensure_post_owner)],
+)
 def update_post(id: int, post: PostSchema, db_pool: DbPool):
     with db_pool.connection() as connection:
         with connection.cursor() as cursor:
-            post_id = post_repository.get_post_by_id(cursor=cursor, id=id)
+            updated_post = post_repository.update_post_by_id(
+                cursor=cursor, id=id, post=post)
 
-            if post_id == None:
+            if updated_post is None:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND, detail=f"Post with id {id} not found")
 
-            else:
-                updated_post = post_repository.update_post_by_id(
-                    cursor=cursor, id=id, post=post)
-
-                return updated_post
+            return updated_post

@@ -1,4 +1,4 @@
-from social_media_fastapi.database import pool
+from social_media_fastapi.dependencies import DbPool
 from social_media_fastapi.schemas import UserSchema, UserResponseSchema
 from fastapi import APIRouter, status, HTTPException
 from social_media_fastapi.repositories import users as user_repository
@@ -9,16 +9,16 @@ router = APIRouter(prefix="/users", tags=['users'])
 
 
 @router.get("/")
-def get_users():
-    with pool.connection() as connection:
+def get_users(db_pool: DbPool):
+    with db_pool.connection() as connection:
         with connection.cursor() as cursor:
             all_users = user_repository.get_all_users(cursor=cursor)
             return all_users
 
 
 @router.post("/", status_code=status.HTTP_201_CREATED, response_model=UserResponseSchema)
-def create_user(user: UserSchema):
-    with pool.connection() as connection:
+def create_user(user: UserSchema, db_pool: DbPool):
+    with db_pool.connection() as connection:
         with connection.cursor() as cursor:
             hashed_password = PasswordHashingService().hash_password(password=user.password)
             user.password = hashed_password
@@ -32,8 +32,8 @@ def create_user(user: UserSchema):
 
 
 @router.get("/{id}", response_model=UserResponseSchema)
-def get_user(id: int):
-    with pool.connection() as connection:
+def get_user(id: int, db_pool: DbPool):
+    with db_pool.connection() as connection:
         with connection.cursor() as cursor:
             user = user_repository.get_user_by_id(cursor=cursor, id=id)
 

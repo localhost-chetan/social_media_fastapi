@@ -6,7 +6,8 @@ from fastapi import Depends, HTTPException, status
 from social_media_fastapi.services.jwt import JWTService
 from social_media_fastapi.schemas import UserResponseSchema
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from social_media_fastapi.repositories import users as user_repository
+from social_media_fastapi.repositories import (
+    users as user_repository, posts as post_repository)
 
 
 def get_db_pool() -> ConnectionPool:
@@ -67,3 +68,27 @@ CurrentUser = Annotated[
     UserResponseSchema,
     Depends(get_current_user)
 ]
+
+
+def ensure_post_owner(id: int, db_pool: DbPool, current_user: CurrentUser) -> None:
+    """Ensure the authenticated user owns the post with the given ID.
+
+    If the post exists & belongs to a different user, raises an
+    HTTP 403 error. If the current user owns the post, returns ``None``.
+    """
+
+    with db_pool.connection() as connection:
+        with connection.cursor() as cursor:
+            post = post_repository.get_post_by_id(cursor=cursor, id=id)
+
+    if post is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Post with id {id} not found",
+        )
+
+    if post.user_id != current_user.id:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You are not allowed to view/modify this post",
+        )
