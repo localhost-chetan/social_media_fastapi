@@ -43,11 +43,11 @@ def create_post(*, cursor: Cursor, post: PostSchema, current_user_id: UserRespon
     cursor.execute("""
         INSERT INTO
             public.posts
-            (title, content, is_published, user_id)
+            (title, content, is_published, auther_id)
         VALUES
             (%s, %s, %s, %s)
         RETURNING
-            id, title, content, is_published, created_at, user_id;
+            id, title, content, is_published, created_at, auther_id;
     """, (post.title, post.content, post.is_published, current_user_id))
 
     row = cursor.fetchone()
