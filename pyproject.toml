@@ -8,7 +8,7 @@ authors = [
 ]
 requires-python = ">=3.14"
 dependencies = [
-    "fastapi>=0.148.0",
+    "fastapi[standard]>=0.148.0",
     "psycopg[binary,pool]>=3.3.6",
     "pwdlib[argon2]>=0.3.1",
     "pydantic[email]>=2.14.1",
@@ -21,3 +21,6 @@ dependencies = [
 [build-system]
 requires = ["uv_build>=0.12.3,<0.13.0"]
 build-backend = "uv_build"
+
+[tool.fastapi]
+entrypoint = "social_media_fastapi.main:app"
