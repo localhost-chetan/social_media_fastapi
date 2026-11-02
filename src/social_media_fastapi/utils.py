@@ -6,7 +6,7 @@ load_dotenv()
 
 
 KeyType = Literal["JWT_SECRET_KEY",
-                  "JWT_EXPIRATION_TIME", "DATABASE_URL", "APP_ENV"]
+                  "JWT_EXPIRATION_TIME", "DATABASE_URL", "FASTAPI_ENV"]
 
 
 def get_env_key(*, key_name: KeyType):
