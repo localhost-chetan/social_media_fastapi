@@ -1,6 +1,6 @@
 from social_media_fastapi.dependencies import DbPool
-from social_media_fastapi.schemas import UserSchema, UserResponseSchema
-from fastapi import APIRouter, status, HTTPException
+from social_media_fastapi.schemas import (UserSchema, UserResponseSchema)
+from fastapi import (APIRouter, status, HTTPException)
 from social_media_fastapi.repositories import users as user_repository
 from social_media_fastapi.services.hashing import PasswordHashingService
 

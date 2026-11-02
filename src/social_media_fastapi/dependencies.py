@@ -2,10 +2,10 @@ from typing import Annotated
 from jwt import InvalidTokenError
 from psycopg_pool import ConnectionPool
 from social_media_fastapi.database import pool
-from fastapi import Depends, HTTPException, status
+from fastapi import (Depends, HTTPException, status)
 from social_media_fastapi.services.jwt import JWTService
 from social_media_fastapi.schemas import UserResponseSchema
-from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.security import (HTTPBearer, HTTPAuthorizationCredentials)
 from social_media_fastapi.repositories import (
     users as user_repository, posts as post_repository)
 

@@ -1,17 +1,22 @@
-from typing import Annotated
-from typing import List
 from psycopg import Cursor
+from typing import (List, Annotated)
 from social_media_fastapi.schemas import (
-    PostSchema, PostResponseSchema, UserResponseSchema)
+    PostSchema, PostResponseSchema, UserResponseSchema, PaginationParams)
 
 
-def get_all_posts(*, cursor: Cursor) -> List[PostResponseSchema]:
+def get_all_posts(*, cursor: Cursor, pagination: PaginationParams) -> List[PostResponseSchema]:
+    limit, offest = pagination.limit, pagination.offset
+
     cursor.execute("""
         SELECT
             *
         FROM
-            public.posts;
-    """)
+            public.posts
+        OFFSET
+            %s
+        LIMIT
+            %s;
+    """, (offest, limit))
 
     return [PostResponseSchema.model_validate(row) for row in cursor.fetchall()]
 

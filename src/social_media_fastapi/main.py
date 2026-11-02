@@ -1,7 +1,6 @@
-from os import environ
 from fastapi import FastAPI
 from social_media_fastapi.database import pool
-from social_media_fastapi.routers import users, posts, auth
+from social_media_fastapi.routers import (users, posts, auth, votes)
 
 
 app = FastAPI(title="Social Media Backend")
@@ -27,3 +26,4 @@ def root():
 app.include_router(router=auth.router)
 app.include_router(router=users.router)
 app.include_router(router=posts.router)
+app.include_router(router=votes.router)

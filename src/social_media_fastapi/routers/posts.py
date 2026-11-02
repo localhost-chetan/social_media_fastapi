@@ -1,10 +1,10 @@
-from typing import List
-from fastapi import Depends
-from fastapi import APIRouter, HTTPException, status
-from social_media_fastapi.dependencies import ensure_post_owner
-from social_media_fastapi.schemas import PostSchema, PostResponseSchema
-from social_media_fastapi.dependencies import DbPool, get_current_user, CurrentUser
+from typing import List, Annotated
+from fastapi import (APIRouter, HTTPException, status, Depends, Query)
 from social_media_fastapi.repositories import posts as post_repository
+from social_media_fastapi.schemas import (
+    PostSchema, PostResponseSchema, PaginationParams)
+from social_media_fastapi.dependencies import (
+    DbPool, get_current_user, CurrentUser, ensure_post_owner)
 
 
 # Every endpoint in this router requires authentication
@@ -16,10 +16,11 @@ router = APIRouter(
 
 
 @router.get("/", response_model=List[PostResponseSchema])
-def get_posts(db_pool: DbPool):
+def get_posts(db_pool: DbPool, pagination: Annotated[PaginationParams, Query()]):
     with db_pool.connection() as connection:
         with connection.cursor() as cursor:
-            all_posts = post_repository.get_all_posts(cursor=cursor)
+            all_posts = post_repository.get_all_posts(
+                cursor=cursor, pagination=pagination)
             return all_posts
 
 

@@ -1,8 +1,9 @@
-from social_media_fastapi.dependencies import CurrentUser, DbPool
+from social_media_fastapi.dependencies import (CurrentUser, DbPool)
 from social_media_fastapi.services.jwt import JWTService
 from social_media_fastapi.services.hashing import PasswordHashingService
-from fastapi import APIRouter, HTTPException, status, Response
-from social_media_fastapi.schemas import UserSchema, LoginResponseSchema, UserResponseSchema
+from fastapi import (APIRouter, HTTPException, status, Response)
+from social_media_fastapi.schemas import (
+    UserSchema, LoginResponseSchema, UserResponseSchema)
 from social_media_fastapi.repositories import users as user_repository
 from social_media_fastapi.utils import get_env_key
 

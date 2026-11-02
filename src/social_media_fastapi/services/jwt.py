@@ -1,9 +1,8 @@
-from typing import Literal
-from social_media_fastapi.utils import get_env_key
-
 import jwt
 from typing import Any
-from datetime import datetime, timezone, timedelta
+from typing import Literal
+from social_media_fastapi.utils import get_env_key
+from datetime import (datetime, timezone, timedelta)
 
 
 KeyType = Literal["JWT_SECRET_KEY", "JWT_EXPIRATION_TIME"]

@@ -1,6 +1,6 @@
 from typing import Annotated
 from datetime import datetime
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import (BaseModel, EmailStr, Field)
 
 
 Password = Annotated[str, Field(...,
@@ -81,3 +81,17 @@ class LoginResponseSchema(BaseModel):
     """
     message: str
     token: str
+
+
+class PaginationParams(BaseModel):
+    limit: int = Field(default=10, gt=0, le=100)
+    offset: int = Field(default=0, ge=0)
+
+
+class VoteSchema(BaseModel):
+    post_id: int
+
+
+class VoteResponseSchema(BaseModel):
+    post_id: int
+    user_id: int
